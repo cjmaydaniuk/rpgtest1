@@ -41,19 +41,18 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) { close = true;  }
         }
-        currentTexture = monitorKeyboard(&character, &textures, speed);// handle keyboard interaction
+        currentTexture = monitorKeyboard(&character, &textures, speed);
         SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
 
-        //ensure character stays on screen
+
         checkBoundaries(&character);
 
 
-        // clear the screen
-        SDL_RenderClear(rend);
+        SDL_RenderClear(rend);         // clear the screen
 
-        SDL_RenderCopy(rend, currentTexture, NULL, &character);
+        SDL_RenderCopy(rend, currentTexture, NULL, &character); // add character sprite to rendering queue
 
-        SDL_RenderPresent(rend);  // update the screen with any buffered rendering
+        SDL_RenderPresent(rend);  // update the screen with any queued rendering
         SDL_Delay(delay);         // 165 fps
            
         }
@@ -69,8 +68,10 @@ int main(int argc, char* argv[]) {
         return 0;
 }
 
+//loads all textures into the textures vector
 void initTextures(SDL_Renderer* rend, Textures* textures)
 {
+    //manual texture loading until I get to storing the list of textures in a data file, use xml?
     printf("loading textures");
     SDL_Texture* currentTexture = loadTexture(rend, "media/character/main_character.png");
     std::string name = "texBase";
@@ -83,6 +84,7 @@ void initTextures(SDL_Renderer* rend, Textures* textures)
     textures->addTexture(currentTexture, name, description);
 }
 
+// returns an SDL_Texture* object using an image file at path
 SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
     SDL_Surface* surface;
     surface = IMG_Load(path);
@@ -96,6 +98,7 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
     return tex;
 }
 
+//handle keyboard interactions
 SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
     if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_UP]) {
@@ -116,8 +119,8 @@ SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed)
         return textures->getTextureByName("texBase").texture;
 }
 
+// ensure character stays within screen boundaries
 void checkBoundaries(SDL_Rect* character) {
-    // ensure character stays within screen boundaries
     if (character->x + character->w > 1000)
         character->x = 1000 - character->w;
     if (character->x < 0)
