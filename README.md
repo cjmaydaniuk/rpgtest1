@@ -1,1 +1,1 @@
-# rpgtest1
+Testing repo for basic RPG elements
