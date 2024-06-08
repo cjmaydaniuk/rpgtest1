@@ -157,6 +157,10 @@
     <Library Include="lib\SDL2.lib" />
     <Library Include="lib\SDL2main.lib" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="texture_classes.h" />
+    <ClInclude Include="rpgtest.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
