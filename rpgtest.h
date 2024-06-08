@@ -9,3 +9,5 @@
 
 void initTextures(SDL_Renderer* rend, Textures* textures);
 SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path);
+SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed);
+void checkBoundaries(SDL_Rect* character);

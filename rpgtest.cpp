@@ -1,8 +1,4 @@
 #include "rpgtest.h"
-#include <string>
-
-
-
 
 int main(int argc, char* argv[]) {
 
@@ -45,47 +41,20 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) { close = true;  }
         }
-        // handle keyboard interaction
-        const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-        if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_UP]) {
-            character.y -= speed;
-        }
-            if (keyboardState[SDL_SCANCODE_A] || keyboardState[SDL_SCANCODE_LEFT]) {
-                character.x -= (speed);
-            }
-            if (keyboardState[SDL_SCANCODE_S] || keyboardState[SDL_SCANCODE_DOWN]) {
-                character.y += speed;
-            }
-            if (keyboardState[SDL_SCANCODE_D] || keyboardState[SDL_SCANCODE_RIGHT]) {
-                character.x += (speed);
-            }
-            if (keyboardState[SDL_SCANCODE_RETURN])
-                currentTexture = textures.getTextureByName("texSwing").texture;
-            if (!keyboardState[SDL_SCANCODE_RETURN])
-                currentTexture = textures.getTextureByName("texBase").texture;
-                
-                
-                
-            SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
+        currentTexture = monitorKeyboard(&character, &textures, speed);// handle keyboard interaction
+        SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
+
+        //ensure character stays on screen
+        checkBoundaries(&character);
 
 
-            // ensure character stays within screen boundaries
-            if (character.x + character.w > 1000)
-                character.x = 1000 - character.w;
-            if (character.x < 0)
-                character.x = 0;
-            if (character.y + character.h > 1000)
-                character.y = 1000 - character.h;
-            if (character.y < 0)
-                character.y = 0;
+        // clear the screen
+        SDL_RenderClear(rend);
 
-            // clear the screen
-            SDL_RenderClear(rend);
+        SDL_RenderCopy(rend, currentTexture, NULL, &character);
 
-            SDL_RenderCopy(rend, currentTexture, NULL, &character);
-
-            SDL_RenderPresent(rend);  // update the screen with any buffered rendering
-            SDL_Delay(delay);         // 165 fps
+        SDL_RenderPresent(rend);  // update the screen with any buffered rendering
+        SDL_Delay(delay);         // 165 fps
            
         }
 
@@ -125,4 +94,36 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
     SDL_FreeSurface(surface);
     printf("created texture");
     return tex;
+}
+
+SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed) {
+    const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+    if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_UP]) {
+        character->y -= speed;
+    }
+    if (keyboardState[SDL_SCANCODE_A] || keyboardState[SDL_SCANCODE_LEFT]) {
+        character->x -= (speed);
+    }
+    if (keyboardState[SDL_SCANCODE_S] || keyboardState[SDL_SCANCODE_DOWN]) {
+        character->y += speed;
+    }
+    if (keyboardState[SDL_SCANCODE_D] || keyboardState[SDL_SCANCODE_RIGHT]) {
+        character->x += (speed);
+    }
+    if (keyboardState[SDL_SCANCODE_RETURN])
+        return textures->getTextureByName("texSwing").texture;
+    if (!keyboardState[SDL_SCANCODE_RETURN])
+        return textures->getTextureByName("texBase").texture;
+}
+
+void checkBoundaries(SDL_Rect* character) {
+    // ensure character stays within screen boundaries
+    if (character->x + character->w > 1000)
+        character->x = 1000 - character->w;
+    if (character->x < 0)
+        character->x = 0;
+    if (character->y + character->h > 1000)
+        character->y = 1000 - character->h;
+    if (character->y < 0)
+        character->y = 0;
 }
