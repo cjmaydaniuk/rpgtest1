@@ -22,7 +22,9 @@ int main(int argc, char* argv[]) {
 
     initTextures(rend, &textures);
     initCharacter(&character, &textures);
-            
+    
+    Map map("Test Map", 4, 2);
+
     // main loop
     while (!close) {
         SDL_Event event;

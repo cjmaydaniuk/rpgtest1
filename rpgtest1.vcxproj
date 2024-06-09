@@ -152,14 +152,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="rpgtest.cpp" />
+    <ClCompile Include="map.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="lib\SDL2.lib" />
     <Library Include="lib\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="character_classes.h" />
-    <ClInclude Include="texture_classes.h" />
+    <ClInclude Include="class_character.h" />
+    <ClInclude Include="class_map.h" />
+    <ClInclude Include="map.h" />
+    <ClInclude Include="class_texture.h" />
     <ClInclude Include="rpgtest.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
