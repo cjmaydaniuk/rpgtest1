@@ -26,10 +26,11 @@ int main(int argc, char* argv[]) {
 
     // define a rectangular object for our character and apply our texture to it
     Character character;
-    initCharacter(&character);
-
     SDL_Texture* currentTexture = textures.getTextureByName("texBaseLeft").texture;
     SDL_QueryTexture(currentTexture, NULL, NULL, &character.object.w, &character.object.h);
+    initCharacter(&character);
+
+
     
     // initialize stamina bar
     SDL_Rect staminaBarMax;
@@ -128,7 +129,7 @@ SDL_Texture* monitorKeyboard(Character* character, Textures* textures) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
     int speed = character->speed;
-    if ((keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT]) && character->curStamina > 10)    {
+    if ((keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT]) && character->curStamina > 3)    {
         speed *= 3;
         character->curStamina -= 3;
     }
