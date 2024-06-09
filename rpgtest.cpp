@@ -4,49 +4,30 @@ enum WINDOW_PROPERTIES { WIDTH = 1440, HEIGHT = 1080 };
 
 int main(int argc, char* argv[]) {
 
+    Uint32 render_flags = SDL_RENDERER_ACCELERATED;     // use hardware acceleration
+    Uint32 delay = 1000 / 165;
+    Textures textures;
+    bool close = false;
+
+
+    //initialize window, renderer, and textures
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("error initializing SDL: %s\n", SDL_GetError());
     }
-
-    Textures textures;
-
-    SDL_Window* mainWindow = SDL_CreateWindow("GAME",
+    SDL_Window* mainWindow = SDL_CreateWindow("RPG TEST",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         WINDOW_PROPERTIES::WIDTH, WINDOW_PROPERTIES::HEIGHT, 0);
-
-    // use hardware acceleration
-    Uint32 render_flags = SDL_RENDERER_ACCELERATED;
-
-
-
-    // creates a renderer to render our images and creates a surface to load an image into the main memory
     SDL_Renderer* rend = SDL_CreateRenderer(mainWindow, -1, render_flags);
     initTextures(rend, &textures);
 
-    // define a rectangular object for our character and apply our texture to it
+    //initialize character
     Character character;
     SDL_Texture* currentTexture = textures.getTextureByName("texBaseLeft").texture;
     SDL_QueryTexture(currentTexture, NULL, NULL, &character.object.w, &character.object.h);
     initCharacter(&character);
-
-
-    
-    // initialize stamina bar
-    SDL_Rect staminaBarMax;
-    SDL_Rect staminaBarCurrent;
-    staminaBarMax.x = 10; staminaBarMax.y = 10; staminaBarMax.h = 10; staminaBarMax.w = character.maxStamina;
-    staminaBarCurrent.x = 10; staminaBarCurrent.y = 10; staminaBarCurrent.h = 10; staminaBarCurrent.w = character.curStamina;
-
-
-
-
-
-    // initialize character
-    
-    // initialize main loop variables
-    bool close = false;
-    Uint32 delay = 1000 / 165; // 165 FPS
+               
+    // main loop
     while (!close) {
         SDL_Event event;
         // Events management
@@ -59,24 +40,12 @@ int main(int argc, char* argv[]) {
 
         checkBoundaries(&character.object);
 
-
-        SDL_RenderClear(rend);         // clear the screen
-
-        SDL_RenderCopy(rend, currentTexture, NULL, &character.object); // add character sprite to rendering queue
-        SDL_SetRenderDrawColor(rend, 0, 255, 0, 255);
-        staminaBarMax.w = character.maxStamina;
-        SDL_RenderDrawRect(rend, &staminaBarMax);
-        staminaBarCurrent.w = character.curStamina;
-        SDL_RenderFillRect(rend, &staminaBarCurrent);
-        SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
-        
-        SDL_RenderPresent(rend);  // update the screen with any queued rendering
+        drawFrame(rend, currentTexture, &character, &textures);
         SDL_Delay(delay);         // 165 fps
            
         }
 
         // destroy texture, renderer, and window, then quit
-        
         textures.destroyTextures();
         SDL_DestroyTexture(currentTexture);
         SDL_DestroyRenderer(rend);
@@ -167,22 +136,77 @@ SDL_Texture* monitorKeyboard(Character* character, Textures* textures) {
 }
 
 // ensure character stays within screen boundaries
-void checkBoundaries(SDL_Rect* character) {
-    if (character->x + character->w > WINDOW_PROPERTIES::WIDTH)
-        character->x = WINDOW_PROPERTIES::WIDTH - character->w;
-    if (character->x < 0)
-        character->x = 0;
-    if (character->y + character->h > WINDOW_PROPERTIES::HEIGHT)
-        character->y = WINDOW_PROPERTIES::HEIGHT - character->h;
-    if (character->y < 0)
-        character->y = 0;
+void checkBoundaries(SDL_Rect* characterObject) {
+    if (characterObject->x + characterObject->w > WINDOW_PROPERTIES::WIDTH)
+        characterObject->x = WINDOW_PROPERTIES::WIDTH - characterObject->w;
+    if (characterObject->x < 0)
+        characterObject->x = 0;
+    if (characterObject->y + characterObject->h > WINDOW_PROPERTIES::HEIGHT)
+        characterObject->y = WINDOW_PROPERTIES::HEIGHT - characterObject->h;
+    if (characterObject->y < 0)
+        characterObject->y = 0;
 }
 
 void initCharacter(Character* character) {
+    character->maxHP = 250;
+    character->curHP = 250;
+    character->maxMP = 250;
+    character->curMP = 250;
     character->maxStamina = 250; 
     character->curStamina = 250;
     character->setPosition((WINDOW_PROPERTIES::WIDTH - character->getWidth()) / 2, (WINDOW_PROPERTIES::HEIGHT - character->getHeight()) / 2);
     character->speed = 3; 
     character->direction = 0; //0 = left, 1 = right
+}
 
+void drawFrame(SDL_Renderer* rend, SDL_Texture* currentTexture, Character* character, Textures* textures) {
+    
+    SDL_Rect hpBarMax;
+    SDL_Rect hpBarCurrent;
+
+    SDL_Rect mpBarMax;
+    SDL_Rect mpBarCurrent;
+        
+    SDL_Rect staminaBarMax;
+    SDL_Rect staminaBarCurrent;
+    
+    //initialize hp bar
+    hpBarMax.x = 10; hpBarMax.y = 10; hpBarMax.h = 10; hpBarMax.w = 150;
+    hpBarCurrent.x = 10; hpBarCurrent.y = 10; hpBarCurrent.h = 10; hpBarCurrent.w = (int)(character->curHP/character->maxHP)*150;
+    //initialize mp bar
+    mpBarMax.x = 10; mpBarMax.y = 25; mpBarMax.h = 10; mpBarMax.w = 150;
+    mpBarCurrent.x = 10; mpBarCurrent.y = 25; mpBarCurrent.h = 10; mpBarCurrent.w = (int)(character->curMP/character->maxMP)*150;
+    //initialize stamina bar
+    staminaBarMax.x = 10; staminaBarMax.y = 40; staminaBarMax.h = 10; staminaBarMax.w = 150;
+    staminaBarCurrent.x = 10; staminaBarCurrent.y = 40; staminaBarCurrent.h = 10; staminaBarCurrent.w = (int)(character->curStamina/character->maxStamina)*150;    
+
+
+    SDL_RenderClear(rend);         // clear the screen
+
+    //terrain layer goes here
+    //under layer goes here
+
+    SDL_RenderCopy(rend, currentTexture, NULL, character->getObjectPtr()); // player layer
+
+    //upper layer goes here
+    //potential second upper layer
+    
+    //UI elements
+    //HP bar
+    SDL_SetRenderDrawColor(rend, 255, 0, 0, 255);
+    SDL_RenderDrawRect(rend, &hpBarMax);
+    SDL_RenderFillRect(rend, &hpBarCurrent);
+    
+    //MP bar
+    SDL_SetRenderDrawColor(rend, 0, 0, 255, 255);
+    SDL_RenderDrawRect(rend, &mpBarMax);
+    SDL_RenderFillRect(rend, &mpBarCurrent);
+    //stamina bar
+    SDL_SetRenderDrawColor(rend, 0, 255, 0, 255);
+    SDL_RenderDrawRect(rend, &staminaBarMax);
+    SDL_RenderFillRect(rend, &staminaBarCurrent);
+    //return render draw color to black
+    SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
+
+    SDL_RenderPresent(rend);  // update the screen with any queued rendering
 }

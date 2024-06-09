@@ -6,8 +6,9 @@ public:
     SDL_Rect object;
     int speed;
     int direction;
-    double curStamina;
-    double maxStamina;
+    double curHP;    double maxHP;
+    double curMP;    double maxMP;
+    double curStamina;    double maxStamina;
 
     Character(SDL_Rect obj, int s, int d) {
         object = obj;
@@ -28,6 +29,9 @@ public:
     }
     int getHeight() {
         return object.h;
+    }
+    SDL_Rect* getObjectPtr() {
+        return &object;
     }
 
 };

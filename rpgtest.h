@@ -13,4 +13,4 @@ void initCharacter(Character* character);
 SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path);
 SDL_Texture* monitorKeyboard(Character* character, Textures* textures);
 void checkBoundaries(SDL_Rect* character);
-
+void drawFrame(SDL_Renderer* rend, SDL_Texture* currentTexture, Character* character, Textures* textures);
