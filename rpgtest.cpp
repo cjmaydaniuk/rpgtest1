@@ -18,19 +18,21 @@ int main(int argc, char* argv[]) {
 
     // creates a renderer to render our images and creates a surface to load an image into the main memory
     SDL_Renderer* rend = SDL_CreateRenderer(mainWindow, -1, render_flags);
-
     initTextures(rend, &textures);
-    SDL_Texture* currentTexture = textures.getTextureByName("texBase").texture;
-
 
     // define a rectangular object for our character and apply our texture to it
     SDL_Rect character;
-    SDL_QueryTexture(textures.getTextureByName("texBase").texture, NULL, NULL, &character.w, &character.h);
+    SDL_Texture* currentTexture = textures.getTextureByName("texBaseLeft").texture;
+    SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
+
+
+
+
 
     // initialize character
     character.x = (1000 - character.w) / 2;
     character.y = (1000 - character.h) / 2;
-    int speed = 3;
+    int speed = 3; int horizontalDirection = 0; //0 = left, 1 = right
 
     // initialize main loop variables
     bool close = false;
@@ -41,7 +43,7 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) { close = true;  }
         }
-        currentTexture = monitorKeyboard(&character, &textures, speed);
+        currentTexture = monitorKeyboard(&character, &textures, speed, horizontalDirection);
         SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
 
 
@@ -72,14 +74,23 @@ int main(int argc, char* argv[]) {
 void initTextures(SDL_Renderer* rend, Textures* textures)
 {
     //manual texture loading until I get to storing the list of textures in a data file, use xml?
-    printf("loading textures");
-    SDL_Texture* currentTexture = loadTexture(rend, "media/character/main_character.png");
-    std::string name = "texBase";
+    SDL_Texture* currentTexture = loadTexture(rend, "media/character/main_character_left.png");
+    std::string name = "texBaseLeft";
     std::string description = "Character sprite facing left";
     textures->addTexture(currentTexture, name, description);
-    printf("loading second texture");
-    currentTexture = loadTexture(rend, "media/character/main_character_swing.png");
-    name = "texSwing";
+
+    currentTexture = loadTexture(rend, "media/character/main_character_right.png");
+    name = "texBaseRight";
+    description = "Character sprite facing left";
+    textures->addTexture(currentTexture, name, description);
+
+    currentTexture = loadTexture(rend, "media/character/main_character_swing_left.png");
+    name = "texSwingLeft";
+    description = "Character sprite facing left swinging sword";
+    textures->addTexture(currentTexture, name, description);
+
+    currentTexture = loadTexture(rend, "media/character/main_character_swing_right.png");
+    name = "texSwingRight";
     description = "Character sprite facing left swinging sword";
     textures->addTexture(currentTexture, name, description);
 }
@@ -99,24 +110,32 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
 }
 
 //handle keyboard interactions
-SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed) {
+SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed, int horizontalDirection) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+    int* h = &horizontalDirection;
     if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_UP]) {
         character->y -= speed;
     }
     if (keyboardState[SDL_SCANCODE_A] || keyboardState[SDL_SCANCODE_LEFT]) {
         character->x -= (speed);
+        *h = 0;
     }
     if (keyboardState[SDL_SCANCODE_S] || keyboardState[SDL_SCANCODE_DOWN]) {
         character->y += speed;
     }
     if (keyboardState[SDL_SCANCODE_D] || keyboardState[SDL_SCANCODE_RIGHT]) {
         character->x += (speed);
+        *h = 1;
     }
-    if (keyboardState[SDL_SCANCODE_RETURN])
-        return textures->getTextureByName("texSwing").texture;
-    if (!keyboardState[SDL_SCANCODE_RETURN])
-        return textures->getTextureByName("texBase").texture;
+    
+    if (keyboardState[SDL_SCANCODE_RETURN]) {
+        if (*h == 0) { return textures->getTextureByName("texSwingLeft").texture; }
+        if (*h == 1) { return textures->getTextureByName("texSwingRight").texture; }
+    }
+    if (!keyboardState[SDL_SCANCODE_RETURN]) {
+        if (*h == 0) { return textures->getTextureByName("texBaseLeft").texture; }
+        if (*h == 1) { return textures->getTextureByName("texBaseRight").texture; }
+    }
 }
 
 // ensure character stays within screen boundaries
