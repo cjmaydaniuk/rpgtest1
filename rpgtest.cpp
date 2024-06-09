@@ -105,7 +105,6 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
 
     SDL_Texture* tex = SDL_CreateTextureFromSurface(rend, surface);
     SDL_FreeSurface(surface);
-    printf("created texture");
     return tex;
 }
 
@@ -113,6 +112,11 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
 SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed, int horizontalDirection) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
     int* h = &horizontalDirection;
+    if (keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT])    {
+        speed *= 2;
+    }
+
+    
     if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_UP]) {
         character->y -= speed;
     }
