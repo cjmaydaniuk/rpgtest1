@@ -25,19 +25,24 @@ int main(int argc, char* argv[]) {
     initTextures(rend, &textures);
 
     // define a rectangular object for our character and apply our texture to it
-    SDL_Rect character;
+    Character character;
+    initCharacter(&character);
+
     SDL_Texture* currentTexture = textures.getTextureByName("texBaseLeft").texture;
-    SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
+    SDL_QueryTexture(currentTexture, NULL, NULL, &character.object.w, &character.object.h);
+    
+    // initialize stamina bar
+    SDL_Rect staminaBarMax;
+    SDL_Rect staminaBarCurrent;
+    staminaBarMax.x = 10; staminaBarMax.y = 10; staminaBarMax.h = 10; staminaBarMax.w = character.maxStamina;
+    staminaBarCurrent.x = 10; staminaBarCurrent.y = 10; staminaBarCurrent.h = 10; staminaBarCurrent.w = character.curStamina;
 
 
 
 
 
     // initialize character
-    character.x = (WINDOW_PROPERTIES::WIDTH - character.w) / 2;
-    character.y = (WINDOW_PROPERTIES::HEIGHT - character.h) / 2;
-    int speed = 3; int horizontalDirection = 0; //0 = left, 1 = right
-
+    
     // initialize main loop variables
     bool close = false;
     Uint32 delay = 1000 / 165; // 165 FPS
@@ -47,17 +52,23 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) { close = true;  }
         }
-        currentTexture = monitorKeyboard(&character, &textures, speed, horizontalDirection);
-        SDL_QueryTexture(currentTexture, NULL, NULL, &character.w, &character.h);
+        currentTexture = monitorKeyboard(&character, &textures);
+        SDL_QueryTexture(currentTexture, NULL, NULL, &character.object.w, &character.object.h);
 
 
-        checkBoundaries(&character);
+        checkBoundaries(&character.object);
 
 
         SDL_RenderClear(rend);         // clear the screen
 
-        SDL_RenderCopy(rend, currentTexture, NULL, &character); // add character sprite to rendering queue
-
+        SDL_RenderCopy(rend, currentTexture, NULL, &character.object); // add character sprite to rendering queue
+        SDL_SetRenderDrawColor(rend, 0, 255, 0, 255);
+        staminaBarMax.w = character.maxStamina;
+        SDL_RenderDrawRect(rend, &staminaBarMax);
+        staminaBarCurrent.w = character.curStamina;
+        SDL_RenderFillRect(rend, &staminaBarCurrent);
+        SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
+        
         SDL_RenderPresent(rend);  // update the screen with any queued rendering
         SDL_Delay(delay);         // 165 fps
            
@@ -113,36 +124,42 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
 }
 
 //handle keyboard interactions
-SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed, int horizontalDirection) {
+SDL_Texture* monitorKeyboard(Character* character, Textures* textures) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-    int* h = &horizontalDirection;
-    if (keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT])    {
-        speed *= 2;
+
+    int speed = character->speed;
+    if ((keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT]) && character->curStamina > 10)    {
+        speed *= 3;
+        character->curStamina -= 3;
+    }
+    else {
+        character->curStamina += 1.5;
+        if (character->curStamina > character->maxStamina) { character->curStamina = character->maxStamina; }
     }
 
     
     if (keyboardState[SDL_SCANCODE_W] || keyboardState[SDL_SCANCODE_UP]) {
-        character->y -= speed;
+        character->move(0, -speed);
     }
     if (keyboardState[SDL_SCANCODE_A] || keyboardState[SDL_SCANCODE_LEFT]) {
-        character->x -= (speed);
-        *h = 0;
+        character->move(-speed, 0);
+        character->direction = 0;
     }
     if (keyboardState[SDL_SCANCODE_S] || keyboardState[SDL_SCANCODE_DOWN]) {
-        character->y += speed;
+        character->move(0, speed);
     }
     if (keyboardState[SDL_SCANCODE_D] || keyboardState[SDL_SCANCODE_RIGHT]) {
-        character->x += (speed);
-        *h = 1;
+        character->move(speed, 0);
+        character->direction = 1;
     }
     
     if (keyboardState[SDL_SCANCODE_RETURN]) {
-        if (*h == 0) { return textures->getTextureByName("texSwingLeft").texture; }
-        if (*h == 1) { return textures->getTextureByName("texSwingRight").texture; }
+        if (character->direction == 0) { return textures->getTextureByName("texSwingLeft").texture; }
+        if (character->direction == 1) { return textures->getTextureByName("texSwingRight").texture; }
     }
     if (!keyboardState[SDL_SCANCODE_RETURN]) {
-        if (*h == 0) { return textures->getTextureByName("texBaseLeft").texture; }
-        if (*h == 1) { return textures->getTextureByName("texBaseRight").texture; }
+        if (character->direction == 0) { return textures->getTextureByName("texBaseLeft").texture; }
+        if (character->direction == 1) { return textures->getTextureByName("texBaseRight").texture; }
     }
 }
 
@@ -156,4 +173,13 @@ void checkBoundaries(SDL_Rect* character) {
         character->y = WINDOW_PROPERTIES::HEIGHT - character->h;
     if (character->y < 0)
         character->y = 0;
+}
+
+void initCharacter(Character* character) {
+    character->maxStamina = 250; 
+    character->curStamina = 250;
+    character->setPosition((WINDOW_PROPERTIES::WIDTH - character->getWidth()) / 2, (WINDOW_PROPERTIES::HEIGHT - character->getHeight()) / 2);
+    character->speed = 3; 
+    character->direction = 0; //0 = left, 1 = right
+
 }

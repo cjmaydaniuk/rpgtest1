@@ -158,6 +158,7 @@
     <Library Include="lib\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="character_classes.h" />
     <ClInclude Include="texture_classes.h" />
     <ClInclude Include="rpgtest.h" />
   </ItemGroup>

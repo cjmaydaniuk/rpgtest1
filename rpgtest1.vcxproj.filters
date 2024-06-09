@@ -34,5 +34,8 @@
     <ClInclude Include="texture_classes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="character_classes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
