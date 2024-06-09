@@ -1,5 +1,7 @@
 #include "rpgtest.h"
 
+enum WINDOW_PROPERTIES { WIDTH = 1440, HEIGHT = 1080 };
+
 int main(int argc, char* argv[]) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -11,10 +13,12 @@ int main(int argc, char* argv[]) {
     SDL_Window* mainWindow = SDL_CreateWindow("GAME",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        1000, 1000, 0);
+        WINDOW_PROPERTIES::WIDTH, WINDOW_PROPERTIES::HEIGHT, 0);
 
     // use hardware acceleration
     Uint32 render_flags = SDL_RENDERER_ACCELERATED;
+
+
 
     // creates a renderer to render our images and creates a surface to load an image into the main memory
     SDL_Renderer* rend = SDL_CreateRenderer(mainWindow, -1, render_flags);
@@ -30,8 +34,8 @@ int main(int argc, char* argv[]) {
 
 
     // initialize character
-    character.x = (1000 - character.w) / 2;
-    character.y = (1000 - character.h) / 2;
+    character.x = (WINDOW_PROPERTIES::WIDTH - character.w) / 2;
+    character.y = (WINDOW_PROPERTIES::HEIGHT - character.h) / 2;
     int speed = 3; int horizontalDirection = 0; //0 = left, 1 = right
 
     // initialize main loop variables
@@ -144,12 +148,12 @@ SDL_Texture* monitorKeyboard(SDL_Rect* character, Textures* textures, int speed,
 
 // ensure character stays within screen boundaries
 void checkBoundaries(SDL_Rect* character) {
-    if (character->x + character->w > 1000)
-        character->x = 1000 - character->w;
+    if (character->x + character->w > WINDOW_PROPERTIES::WIDTH)
+        character->x = WINDOW_PROPERTIES::WIDTH - character->w;
     if (character->x < 0)
         character->x = 0;
-    if (character->y + character->h > 1000)
-        character->y = 1000 - character->h;
+    if (character->y + character->h > WINDOW_PROPERTIES::HEIGHT)
+        character->y = WINDOW_PROPERTIES::HEIGHT - character->h;
     if (character->y < 0)
         character->y = 0;
 }
