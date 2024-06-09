@@ -9,8 +9,8 @@
 #include "character_classes.h"
 
 void initTextures(SDL_Renderer* rend, Textures* textures);
-void initCharacter(Character* character);
+void initCharacter(Character* character, Textures* textures);
 SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path);
-SDL_Texture* monitorKeyboard(Character* character, Textures* textures);
-void checkBoundaries(SDL_Rect* character);
-void drawFrame(SDL_Renderer* rend, SDL_Texture* currentTexture, Character* character, Textures* textures);
+void checkBoundaries(SDL_Rect* characterObject);
+void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures);
+void monitorKeyboard(Character* character, Textures* textures);
