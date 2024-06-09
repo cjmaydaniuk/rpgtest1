@@ -129,9 +129,11 @@ SDL_Texture* monitorKeyboard(Character* character, Textures* textures) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
     int speed = character->speed;
-    if ((keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT]) && character->curStamina > 3)    {
-        speed *= 3;
-        character->curStamina -= 3;
+    if ((keyboardState[SDL_SCANCODE_RSHIFT] || keyboardState[SDL_SCANCODE_LSHIFT]))    {
+        if (character->curStamina > 3) {
+            speed *= 3;
+            character->curStamina -= 3;
+        }
     }
     else {
         character->curStamina += 1.5;
