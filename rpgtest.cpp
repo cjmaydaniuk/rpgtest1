@@ -71,6 +71,11 @@ void initTextures(SDL_Renderer* rend, Textures* textures)
     name = "texSwingRight";
     description = "Character sprite facing left swinging sword";
     textures->addTexture(currentTexture, name, description);
+
+    currentTexture = loadTexture(rend, "media/terrain/grass1.png");
+    name = "texGrass1";
+    description = "Generic grass texture";
+    textures->addTexture(currentTexture, name, description);
 }
 
 // returns an SDL_Texture* object using an image file at path
@@ -178,6 +183,22 @@ void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures) {
 
     SDL_RenderClear(rend);         // clear the screen
 
+    SDL_Rect tile;
+    SDL_Rect terrainObject;
+    SDL_Texture* terrainTexture = textures->getTextureByName("texGrass1").texture;
+
+    tile.w = 64; tile.h = 64;
+    terrainObject.w = WINDOW_PROPERTIES::WIDTH; terrainObject.h = WINDOW_PROPERTIES::HEIGHT;
+    terrainObject.x = 0; terrainObject.y = 0;
+
+    for (int i = 0; i < (WINDOW_PROPERTIES::WIDTH / 64)+1; i++) {
+        for (int j = 0; j < (WINDOW_PROPERTIES::HEIGHT / 64)+1; j++) {
+            tile.x = i*64; tile.y = j*64;
+            SDL_RenderCopy(rend, terrainTexture, NULL, &tile);
+        }
+    }
+
+    SDL_RenderCopy(rend, nullptr, &tile, &terrainObject);
     //terrain layer goes here
     //under layer goes here
 
