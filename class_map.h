@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+
+
+
 class Tile {
 
 public:
@@ -59,7 +62,7 @@ public:
 		//initialize all tiles to grass
 		for (int x = 0; x < w; x++)	{
 			for (int y = 0; y < h; y++) {
-				this->setTile(x, y, "texGrass1", "", "", "", 0, "");
+				setTile(x, y, "texGrass1", "", "", "", 0, "");
 			}
 		}
 	}

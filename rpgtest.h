@@ -11,9 +11,13 @@
 #include "class_map.h"
 #include "map.h"
 
+enum WINDOW_PROPERTIES { WIDTH = 1440, HEIGHT = 1080 };
+
 void initTextures(SDL_Renderer* rend, Textures* textures);
 void initCharacter(Character* character, Textures* textures);
 SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path);
 void checkBoundaries(SDL_Rect* characterObject);
-void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures);
+void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures, Map* map);
 void monitorKeyboard(Character* character, Textures* textures);
+void drawLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::string layer);
+SDL_Texture* getLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::string layer);

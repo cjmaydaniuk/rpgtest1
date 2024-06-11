@@ -1,11 +1,12 @@
 #include "rpgtest.h"
 
-enum WINDOW_PROPERTIES { WIDTH = 1440, HEIGHT = 1080 };
+
 
 int main(int argc, char* argv[]) {
 
     Uint32 render_flags = SDL_RENDERER_ACCELERATED;     // use hardware acceleration
     Uint32 delay = 1000 / 165;
+    Map map ("Test Map",23,17);
     Textures textures;
     Character character;
     bool close = false;
@@ -23,7 +24,6 @@ int main(int argc, char* argv[]) {
     initTextures(rend, &textures);
     initCharacter(&character, &textures);
     
-    Map map("Test Map", 4, 2);
 
     // main loop
     while (!close) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
         checkBoundaries(&character.object);
 
-        drawFrame(rend, &character, &textures);
+        drawFrame(rend, &character, &textures, &map);
         SDL_Delay(delay);         // delay until next frame
            
     }
@@ -165,7 +165,7 @@ void initCharacter(Character* character, Textures* textures) {
     character->direction = 0; //0 = left, 1 = right
 }
 
-void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures) {
+void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures, Map* map) {
     
     SDL_Rect hpBarMax;  SDL_Rect hpBarCurrent; SDL_Rect hpBarBackground;
     SDL_Rect mpBarMax;  SDL_Rect mpBarCurrent; SDL_Rect mpBarBackground;
@@ -185,25 +185,8 @@ void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures) {
 
     SDL_RenderClear(rend);         // clear the screen
 
-    SDL_Rect tile;
-    SDL_Rect terrainObject;
-    SDL_Texture* terrainTexture = textures->getTextureByName("texGrass1").texture;
-
-    tile.w = 64; tile.h = 64;
-    terrainObject.w = WINDOW_PROPERTIES::WIDTH; terrainObject.h = WINDOW_PROPERTIES::HEIGHT;
-    terrainObject.x = 0; terrainObject.y = 0;
-
-    for (int i = 0; i < (WINDOW_PROPERTIES::WIDTH / 64)+1; i++) {
-        for (int j = 0; j < (WINDOW_PROPERTIES::HEIGHT / 64)+1; j++) {
-            tile.x = i*64; tile.y = j*64;
-            SDL_RenderCopy(rend, terrainTexture, NULL, &tile);
-        }
-    }
-
-    SDL_RenderCopy(rend, nullptr, &tile, &terrainObject);
-    //terrain layer goes here
-    //under layer goes here
-
+    drawLayer(rend, map, textures, "TERRAIN_TEXTURE");
+   
     SDL_RenderCopy(rend, character->currentTexture, NULL, character->getObjectPtr()); // player layer
 
     //upper layer goes here
@@ -232,4 +215,50 @@ void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures) {
     SDL_SetRenderDrawColor(rend, 0, 0, 0, 255);
 
     SDL_RenderPresent(rend);  // update the screen with any queued rendering
+}
+
+void drawLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::string layer) {
+
+    SDL_Texture* currentLayer = getLayer(rend, map, textures, layer);
+    SDL_Rect terrainObject; 
+    
+    terrainObject.w = WINDOW_PROPERTIES::WIDTH; terrainObject.h = WINDOW_PROPERTIES::HEIGHT;
+    terrainObject.x = 0; terrainObject.y = 0;
+        
+    SDL_RenderCopy(rend, currentLayer, NULL, &terrainObject);
+    SDL_DestroyTexture(currentLayer);
+
+}
+
+SDL_Texture* getLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::string layer) {
+
+    SDL_Texture* layerTexture = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, WINDOW_PROPERTIES::WIDTH, WINDOW_PROPERTIES::HEIGHT);
+    SDL_SetRenderTarget(rend, layerTexture); //begin rendering to the new layer texture
+    std::cout << "starting getLayer loop, map of size " << map->w << ":" << map->h << "." << std::endl;
+
+    for (int x = 0; x < map->w; x++) {
+        for (int y = 0; y < map->h; y++) {
+
+            Tile currentTile = map->getTile(x, y);
+            SDL_Texture* currentTexture;
+            SDL_Rect tileObject;
+
+            if (layer == "TERRAIN_TEXTURE") { currentTexture = textures->getTextureByName(currentTile.terrainTexture).texture; }
+            else if (layer == "TERRAIN_MASK") { currentTexture = textures->getTextureByName(currentTile.terrainMask).texture; }
+            else if (layer == "UPPER_TEXTURE") { currentTexture = textures->getTextureByName(currentTile.upperTexture).texture; }
+            else if (layer == "UPPER_MASK") { currentTexture = textures->getTextureByName(currentTile.upperMask).texture; }
+            else { printf("[ERROR] : Could not determine which layer to load from"); break; }
+
+            
+            tileObject.w = 64; tileObject.h = 64;
+            tileObject.x = x * 64; tileObject.y = y * 64;
+            
+
+            SDL_RenderCopy(rend, currentTexture, NULL, &tileObject);
+ 
+        }
+    }
+
+    SDL_SetRenderTarget(rend, NULL); //return rendering to the window
+    return layerTexture;
 }
