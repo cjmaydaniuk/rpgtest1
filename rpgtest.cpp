@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) { close = true;  }
         }
-        monitorKeyboard(&character, &textures);
+        monitorKeyboard(&map, &character, &textures);
 
         checkBoundaries(&character.object);
 
@@ -94,7 +94,7 @@ SDL_Texture* loadTexture(SDL_Renderer* rend, const char* path) {
 }
 
 //handle keyboard interactions
-void monitorKeyboard(Character* character, Textures* textures) {
+void monitorKeyboard(Map* map, Character* character, Textures* textures) {
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
     int speed = character->speed;
 
@@ -126,6 +126,13 @@ void monitorKeyboard(Character* character, Textures* textures) {
         character->move(speed, 0);
         character->direction = 1;
     }
+
+    //debug
+    if (keyboardState[SDL_SCANCODE_M]) {
+        std::cout << "SAVING MAP\n";
+        saveMap(map, "test");
+    }
+
     
     //attack
     if (keyboardState[SDL_SCANCODE_RETURN]) {
@@ -219,13 +226,13 @@ void drawFrame(SDL_Renderer* rend, Character* character, Textures* textures, Map
 
 void drawLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::string layer) {
 
-    SDL_Texture* currentLayer = getLayer(rend, map, textures, layer);
+    SDL_Texture* currentLayer = getLayer(rend, map, textures, layer); 
     SDL_Rect terrainObject; 
     
     terrainObject.w = WINDOW_PROPERTIES::WIDTH; terrainObject.h = WINDOW_PROPERTIES::HEIGHT;
     terrainObject.x = 0; terrainObject.y = 0;
         
-    SDL_RenderCopy(rend, currentLayer, NULL, &terrainObject);
+    SDL_RenderCopy(rend, currentLayer, NULL, &terrainObject); //draw the completed texture from getLayer
     SDL_DestroyTexture(currentLayer);
 
 }
@@ -234,8 +241,7 @@ SDL_Texture* getLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::str
 
     SDL_Texture* layerTexture = SDL_CreateTexture(rend, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, WINDOW_PROPERTIES::WIDTH, WINDOW_PROPERTIES::HEIGHT);
     SDL_SetRenderTarget(rend, layerTexture); //begin rendering to the new layer texture
-    std::cout << "starting getLayer loop, map of size " << map->w << ":" << map->h << "." << std::endl;
-
+    
     for (int x = 0; x < map->w; x++) {
         for (int y = 0; y < map->h; y++) {
 
@@ -253,7 +259,7 @@ SDL_Texture* getLayer(SDL_Renderer* rend, Map* map, Textures* textures, std::str
             tileObject.w = 64; tileObject.h = 64;
             tileObject.x = x * 64; tileObject.y = y * 64;
             
-
+            //copy each tile to currentTexture
             SDL_RenderCopy(rend, currentTexture, NULL, &tileObject);
  
         }
