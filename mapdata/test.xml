@@ -12,7 +12,7 @@
 	<script></script>
 </tile>
 <tile x="0" y="1">
-	<terrain_texture>texGrass1</terrain_texture>
+	<terrain_texture>texGrass2</terrain_texture>
 	<terrain_mask>texGrass1</terrain_mask>
 	<upper_texture>texGrass1</upper_texture>
 	<upper_mask>texGrass1</upper_mask>
@@ -36,7 +36,7 @@
 	<script></script>
 </tile>
 <tile x="0" y="4">
-	<terrain_texture>texGrass1</terrain_texture>
+	<terrain_texture>texGrass2</terrain_texture>
 	<terrain_mask>texGrass1</terrain_mask>
 	<upper_texture>texGrass1</upper_texture>
 	<upper_mask>texGrass1</upper_mask>
@@ -68,7 +68,7 @@
 	<script></script>
 </tile>
 <tile x="0" y="8">
-	<terrain_texture>texGrass1</terrain_texture>
+	<terrain_texture>texGrass2</terrain_texture>
 	<terrain_mask>texGrass1</terrain_mask>
 	<upper_texture>texGrass1</upper_texture>
 	<upper_mask>texGrass1</upper_mask>

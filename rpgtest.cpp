@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
 
     Uint32 render_flags = SDL_RENDERER_ACCELERATED;     // use hardware acceleration
     Uint32 delay = 1000 / 165;
-    Map map ("Test Map",23,17);
+    Map map = loadMap("test");
     Textures textures;
     Character character;
     bool close = false;
@@ -30,6 +30,14 @@ int main(int argc, char* argv[]) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) { close = true;  }
+            if (event.type == SDL_MOUSEBUTTONDOWN) {
+                int x; int y;
+                SDL_GetMouseState(&x, &y);
+                int tilex = x / 64;
+                int tiley = y / 64;
+                map.setTile(tilex, tiley, "texGrass2", "","","",0,"");
+
+            }
         }
         monitorKeyboard(&map, &character, &textures);
 
@@ -76,6 +84,11 @@ void initTextures(SDL_Renderer* rend, Textures* textures)
 
     currentTexture = loadTexture(rend, "media/terrain/grass1.png");
     name = "texGrass1";
+    description = "Generic grass texture";
+    textures->addTexture(currentTexture, name, description);
+
+    currentTexture = loadTexture(rend, "media/terrain/grass2.png");
+    name = "texGrass2";
     description = "Generic grass texture";
     textures->addTexture(currentTexture, name, description);
 }
@@ -131,6 +144,10 @@ void monitorKeyboard(Map* map, Character* character, Textures* textures) {
     if (keyboardState[SDL_SCANCODE_M]) {
         std::cout << "SAVING MAP\n";
         saveMap(map, "test");
+    }
+    if (keyboardState[SDL_SCANCODE_P]) {
+        std::cout << "LOADING MAP\n";
+        loadMap("test");
     }
 
     
